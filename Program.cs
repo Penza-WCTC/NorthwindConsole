@@ -275,10 +275,10 @@ do
       if (!db.Categories.Any(c => c.CategoryName == category.CategoryName))
       {
         db.Categories.Add(category);
-        db.SaveChanges(); 
+        db.SaveChanges();
       }
 
-      
+
     }
     else if (choice == "2")
     {
@@ -384,6 +384,227 @@ do
   else if (choice == "4")
   {
     Console.Clear();
+
+    Console.WriteLine("Would you like to...");
+    Console.WriteLine("\t1) Add a new Product");
+    Console.WriteLine("\t2) Edit an existing Product");
+    Console.Write("?: ");
+    choice = Console.ReadLine();
+
+    var configuration = new ConfigurationBuilder()
+          .AddJsonFile($"appsettings.json");
+    var config = configuration.Build();
+    var db = new DataContext();
+
+    if (choice == "1")
+    {
+      string productName;
+      int? supplierId = null;
+      int? categoryId = null;
+      string? quantityPerUnit;
+      decimal? unitPrice;
+      short? unitsInStock;
+      short? unitsOnOrder;
+      short? reorderLevel;
+      bool discontinued;
+
+      //set name
+      Console.WriteLine("What would you like your new product's name to be?");
+      Console.Write("?: ");
+      productName = Console.ReadLine();
+
+      //set supplier
+      {
+        var queryS = db.Suppliers.OrderBy(s => s.SupplierId);
+        List<int> availableIds = new List<int>();
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryS.Count()} records returned");
+
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryS)
+        {
+          Console.WriteLine($"\t{item.SupplierId}) - {item.CompanyName}");
+          availableIds.Add(item.SupplierId);
+        }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Who is the supplier?\nIf they are not listed, please type NL.");
+        Console.Write("?: ");
+        var userTestSelection = Console.ReadLine();
+
+        //checks to see if the user input was an int, then stores the int for later use
+        if (int.TryParse(userTestSelection, out int userSelection))
+        {
+          //checks to see if the user input is in the list of available IDs
+          if (availableIds.Contains(userSelection))
+          {
+            supplierId = userSelection;
+          }
+          else
+          {
+            //error handling
+            logger.Error("User entered an ID out of range");
+            Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+            Console.ReadLine();
+          }
+        }
+        else
+        {
+          if (userTestSelection.ToLower() == "nl")
+          {
+            //log that the user chose not have any supplier chosen
+          }
+          else
+          {
+            //error handling
+            logger.Error("User entered invalid selection.");
+            Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+            Console.ReadLine();
+          }
+        }
+      }
+      //sets categories
+      {
+        var queryC = db.Categories.OrderBy(s => s.CategoryId);
+        List<int> availableIds = new List<int>();
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryC.Count()} records returned");
+
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryC)
+        {
+          Console.WriteLine($"\t{item.CategoryId}) - {item.CategoryName}");
+          availableIds.Add(item.CategoryId);
+        }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("What is the category?\nIf it is not listed, please type NL.");
+        Console.Write("?: ");
+        var userTestSelection = Console.ReadLine();
+
+        //checks to see if the user input was an int, then stores the int for later use
+        if (int.TryParse(userTestSelection, out int userSelection))
+        {
+          //checks to see if the user input is in the list of available IDs
+          if (availableIds.Contains(userSelection))
+          {
+            var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+            categoryId = selectedCategory.CategoryId;
+          }
+          else
+          {
+            //error handling
+            logger.Error("User entered an ID out of range");
+            Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+            Console.ReadLine();
+          }
+        }
+        else
+        {
+          if (userTestSelection.ToLower() == "nl")
+          {
+            //log that the user chose not have any category chosen
+          }
+          else
+          {
+            //error handling
+            logger.Error("User entered invalid selection.");
+            Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+            Console.ReadLine();
+          }
+        }
+      }
+      //sets quantity per unit
+      Console.WriteLine($"What is {productName}'s quantity per unit?");
+      Console.Write("?: ");
+      quantityPerUnit = Console.ReadLine();
+
+      Console.WriteLine($"What is {productName}'s unit price?");
+      Console.Write("?: ");
+      if (decimal.TryParse(Console.ReadLine(), out decimal decimalHolder))
+      {
+        unitPrice = decimalHolder;
+      }
+      else
+      {
+        unitPrice = null;
+      }
+
+      Console.WriteLine($"How many {productName}s are in stock?");
+      Console.Write("?: ");
+      if (short.TryParse(Console.ReadLine(), out short shortHolder))
+      {
+        unitsInStock = shortHolder;
+      }
+      else
+      {
+        unitsInStock = null;
+      }
+
+      Console.WriteLine($"How many {productName}s are on order?");
+      Console.Write("?: ");
+      if (short.TryParse(Console.ReadLine(), out shortHolder))
+      {
+        unitsOnOrder = shortHolder;
+      }
+      else
+      {
+        unitsOnOrder = null;
+      }
+
+      Console.WriteLine($"What is the reorder level of {productName}?");
+      Console.Write("?: ");
+      if (short.TryParse(Console.ReadLine(), out shortHolder))
+      {
+        reorderLevel = shortHolder;
+      }
+      else
+      {
+        reorderLevel = null;
+      }
+
+      Console.WriteLine($"Is {productName} discontinued?\n\t(y/n)");
+      while (true)
+      {
+        Console.Write("?: ");
+        var holder = Console.ReadLine();
+        if (holder.ToLower() == "y")
+        {
+          discontinued = true;
+          break;
+        }
+        else if (holder.ToLower() == "n")
+        {
+          discontinued = false;
+          break;
+        }
+        else
+        {
+          Console.WriteLine("Please use (y/n)");
+        }
+      }
+
+      Product product = new Product { ProductName = productName, SupplierId = supplierId, CategoryId = categoryId, QuantityPerUnit = quantityPerUnit, UnitPrice = unitPrice, UnitsInStock = unitsInStock, UnitsOnOrder = unitsOnOrder, ReorderLevel = reorderLevel, Discontinued = discontinued};
+
+      if (!db.Products.Any(c => c.ProductName == product.ProductName))
+      {
+        db.Products.Add(product);
+        db.SaveChanges();
+      }
+    }
+    else if (choice == "2")
+    {
+      //edit
+    }
+    else
+    {
+      //error handling
+      logger.Error("User entered invalid selection.");
+      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+      Console.ReadLine();
+    }
   }
   // Delete a Category
   else if (choice == "5")
