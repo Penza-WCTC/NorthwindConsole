@@ -6,6 +6,7 @@ using NorthwindConsole.Model;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Identity.Client;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 string path = Directory.GetCurrentDirectory() + "//nlog.config";
 
 // create instance of Logger
@@ -149,7 +150,7 @@ do
       Console.WriteLine("Would you like to view...");
       Console.WriteLine("\t1) All Products");
       Console.WriteLine("\t2) Active Products");
-      Console.WriteLine("\t3) Discounted Products");
+      Console.WriteLine("\t3) Discontinued Products");
       Console.Write("\tPress Enter to ");
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine("leave");
@@ -197,10 +198,23 @@ do
         Console.WriteLine("Press Enter to filter again");
         Console.ReadLine();
       }
-      //discounted products
+      //discontinued products
       else if (choice == "3")
       {
+        Console.Clear();
+        var queryP = db.Products.Where(p => p.Discontinued == true).OrderBy(p => p.ProductId);
 
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryP.Count()} records returned");
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryP)
+        {
+          Console.WriteLine($"\t{item.ProductId}) {item.ProductName}, ${item.UnitPrice}");
+        }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Press Enter to filter again");
+        Console.ReadLine();
       }
       else
       {
