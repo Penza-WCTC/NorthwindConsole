@@ -172,7 +172,7 @@ do
         Console.ForegroundColor = ConsoleColor.Magenta;
         foreach (var item in queryP)
         {
-          Console.WriteLine($"{item.ProductId}) {item.ProductName}, ${item.UnitPrice}");
+          Console.WriteLine($"\t{item.ProductId}) {item.ProductName}, ${item.UnitPrice}");
         }
 
         Console.ForegroundColor = ConsoleColor.White;
@@ -182,7 +182,20 @@ do
       //active products
       else if (choice == "2")
       {
+        Console.Clear();
+        var queryP = db.Products.Where(p => p.Discontinued == false).OrderBy(p => p.ProductId);
 
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryP.Count()} records returned");
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryP)
+        {
+          Console.WriteLine($"\t{item.ProductId}) {item.ProductName}, ${item.UnitPrice}");
+        }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Press Enter to filter again");
+        Console.ReadLine();
       }
       //discounted products
       else if (choice == "3")
