@@ -13,15 +13,43 @@ logger.Info("Program started");
 
 do
 {
-  Console.WriteLine("1) Display categories");
-  Console.WriteLine("2) Add category");
-  Console.WriteLine("3) Display Category and related products");
-  Console.WriteLine("4) Display all Categories and their related products");
-  Console.WriteLine("Enter to quit");
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.Write("Would you like to ");
+  Console.ForegroundColor = ConsoleColor.Green;
+  Console.Write("Edit / Append ");
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.WriteLine("to:");
+
+  Console.WriteLine("\t1) Categories");
+  Console.WriteLine("\t2) Products");
+
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.Write("Or would you like to ");
+  Console.ForegroundColor = ConsoleColor.Red;
+  Console.Write("Delete ");
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.WriteLine("from:");
+
+  Console.WriteLine("\t3) Categories");
+  Console.WriteLine("\t4) Products");
+
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.Write("Or would you like to ");
+  Console.ForegroundColor = ConsoleColor.Blue;
+  Console.Write("Search ");
+  Console.ForegroundColor = ConsoleColor.White;
+  Console.WriteLine("for a specific:");
+
+  Console.WriteLine("\t5) Category");
+  Console.WriteLine("\t6) Product");
+
+  Console.Write("?: ");
+
   string? choice = Console.ReadLine();
   Console.Clear();
   logger.Info("Option {choice} selected", choice);
-
+  
+/*
   if (choice == "1")
   {
     // display categories
@@ -118,6 +146,7 @@ do
     break;
   }
   Console.WriteLine();
+  */
 } while (true);
 
 logger.Info("Program ended");
