@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using NorthwindConsole.Model;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Identity.Client;
+using System.Runtime.CompilerServices;
 string path = Directory.GetCurrentDirectory() + "//nlog.config";
 
 // create instance of Logger
@@ -140,7 +142,66 @@ do
   // View Specific Product Information
   else if (choice == "2")
   {
-    Console.Clear();
+    while (true)
+    {
+      Console.Clear();
+
+      Console.WriteLine("Would you like to view...");
+      Console.WriteLine("\t1) All Products");
+      Console.WriteLine("\t2) Active Products");
+      Console.WriteLine("\t3) Discounted Products");
+      Console.Write("\tPress Enter to ");
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("leave");
+      Console.ForegroundColor = ConsoleColor.White;
+      choice = Console.ReadLine();
+
+      var configuration = new ConfigurationBuilder()
+            .AddJsonFile($"appsettings.json");
+      var config = configuration.Build();
+      var db = new DataContext();
+
+      //all products
+      if (choice == "1")
+      {
+        Console.Clear();
+        var queryP = db.Products.OrderBy(p => p.ProductId);
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryP.Count()} records returned");
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryP)
+        {
+          Console.WriteLine($"{item.ProductId}) {item.ProductName}, ${item.UnitPrice}");
+        }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Press Enter to filter again");
+        Console.ReadLine();
+      }
+      //active products
+      else if (choice == "2")
+      {
+
+      }
+      //discounted products
+      else if (choice == "3")
+      {
+
+      }
+      else
+      {
+        Console.Clear();
+        Console.WriteLine("You selected an option that was not on the menu.\nWould you like to return to menu?\n\t(y/n)");
+        Console.Write("?: ");
+        if (Console.ReadLine().ToLower() == "y")
+        {
+          logger.Info("Exited Product Info");
+          break;
+        }
+      }
+
+    }
   }
   // Edit / Append to a Category
   else if (choice == "3")
@@ -175,7 +236,7 @@ do
   else
   {
     Console.Clear();
-    Console.WriteLine("You selected an option that was not on the menu.\nWould you like to exit the program?");
+    Console.WriteLine("You selected an option that was not on the menu.\nWould you like to exit the program?\n\t(y/n)");
     Console.Write("?: ");
     if (Console.ReadLine().ToLower() == "y")
     {
