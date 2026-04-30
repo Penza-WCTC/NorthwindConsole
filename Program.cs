@@ -76,7 +76,7 @@ do
 
     //pull query for categories
     var db = new DataContext();
-    var queryC = db.Categories.OrderBy(c => c.CategoryName);
+    var queryC = db.Categories.OrderBy(c => c.CategoryId);
     List<int> availableIds = new List<int>();
 
     //display the categories
@@ -104,7 +104,7 @@ do
 
         Console.Clear();
         //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
-        var selectedCategory = queryC.FirstOrDefault(c => c.CategoryId == userSelection);
+        var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
         //get a query on products that are not discontinued and a part of the current category
         var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
 
@@ -234,6 +234,151 @@ do
   else if (choice == "3")
   {
     Console.Clear();
+
+    Console.WriteLine("Would you like to...");
+    Console.WriteLine("\t1) Add a new Category");
+    Console.WriteLine("\t2) Edit an existing Category");
+    Console.Write("?: ");
+    choice = Console.ReadLine();
+
+    var configuration = new ConfigurationBuilder()
+          .AddJsonFile($"appsettings.json");
+    var config = configuration.Build();
+    var db = new DataContext();
+
+    if (choice == "1")
+    {
+      Console.Clear();
+      Console.WriteLine("Enter your name for a new Category.\nYour name cannot be longer than 15 letters!");
+      var name = "";
+      while (true)
+      {
+        Console.Write(": ");
+        name = Console.ReadLine();
+
+        if (name.Length > 15)
+        {
+          Console.WriteLine("Make sure that it is less than 15 letters!");
+        }
+        else
+        {
+          break;
+        }
+      }
+
+      Console.WriteLine("Enter a new description for your Category");
+      Console.Write(": ");
+      var description = Console.ReadLine();
+
+      Category category = new Category { CategoryName = name, Description = description };
+
+      if (!db.Categories.Any(c => c.CategoryName == category.CategoryName))
+      {
+        db.Categories.Add(category);
+        db.SaveChanges(); 
+      }
+
+      
+    }
+    else if (choice == "2")
+    {
+      var queryC = db.Categories.OrderBy(c => c.CategoryId);
+      List<int> availableIds = new List<int>();
+
+      Console.ForegroundColor = ConsoleColor.Green;
+      Console.WriteLine($"{queryC.Count()} records returned");
+
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      foreach (var item in queryC)
+      {
+        Console.WriteLine($"\t{item.CategoryId}) - {item.CategoryName}");
+        availableIds.Add(item.CategoryId);
+      }
+
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine("Which would you like to edit?");
+      Console.Write("?: ");
+      var userTestSelection = Console.ReadLine();
+
+      //checks to see if the user input was an int, then stores the int for later use
+      if (int.TryParse(userTestSelection, out int userSelection))
+      {
+        //checks to see if the user input is in the list of available IDs
+        if (availableIds.Contains(userSelection))
+        {
+          var name = "";
+          var description = "";
+
+          Console.Clear();
+          //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
+          var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+          Console.WriteLine($"{selectedCategory.CategoryName} - This is the current name, would you like to change it?\n\t(y/n)");
+          Console.Write("?: ");
+          if (Console.ReadLine().ToLower() == "y")
+          {
+            Console.WriteLine("Enter your new name for the Category.\nYour name cannot be longer than 15 letters!");
+            while (true)
+            {
+              Console.Write(": ");
+              name = Console.ReadLine();
+
+              if (name.Length > 15)
+              {
+                Console.WriteLine("Make sure that it is less than 15 letters!");
+              }
+              else
+              {
+                break;
+              }
+            }
+          }
+
+          Console.WriteLine($"{selectedCategory.Description}\nThis is the current description, would you like to change it?\n\t(y/n)");
+          Console.Write("?: ");
+          if (Console.ReadLine().ToLower() == "y")
+          {
+            Console.WriteLine("Enter a new description for your Category");
+            Console.Write(": ");
+            description = Console.ReadLine();
+          }
+
+          if (name != "")
+          {
+            selectedCategory.CategoryName = name;
+          }
+
+
+          if (description != "")
+          {
+            selectedCategory.Description = description;
+          }
+
+          db.SaveChanges();
+        }
+        else
+        {
+          //error handling
+          logger.Error("User entered an ID out of range");
+          Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+          Console.ReadLine();
+        }
+      }
+      else
+      {
+        //error handling
+        logger.Error("User entered invalid selection.");
+        Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+        Console.ReadLine();
+      }
+
+    }
+    else
+    {
+      //error handling
+      logger.Error("User entered invalid selection.");
+      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+      Console.ReadLine();
+    }
   }
   // Edit / Append to a Product
   else if (choice == "4")
