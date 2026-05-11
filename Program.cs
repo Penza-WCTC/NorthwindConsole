@@ -148,6 +148,7 @@ do
       Console.WriteLine("\t1) All Products");
       Console.WriteLine("\t2) Active Products");
       Console.WriteLine("\t3) Discontinued Products");
+      Console.WriteLine("\t4) All a Product's Data");
       Console.Write("\tPress Enter to ");
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine("leave");
@@ -213,6 +214,73 @@ do
         Console.WriteLine("Press Enter to filter again");
         Console.ReadLine();
       }
+      else if (choice == "4")
+      {
+        //pull query for products
+        var queryP = db.Products.OrderBy(p => p.ProductId);
+        List<int> availableIds = new List<int>();
+
+        //display the products
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{queryP.Count()} records returned");
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        foreach (var item in queryP)
+        {
+          Console.WriteLine($"\t{item.ProductId}) - {item.ProductName}");
+          availableIds.Add(item.ProductId);
+        }
+
+        //allow user to pick what products they want to see fully
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Which would you like to see all data for?");
+        Console.Write("?: ");
+        string? userTestSelection = Console.ReadLine();
+
+        //checks to see if the user input was an int, then stores the int for later use
+        if (int.TryParse(userTestSelection, out int userSelection))
+        {
+          //checks to see if the user input is in the list of available IDs
+          if (availableIds.Contains(userSelection))
+          {
+
+            Console.Clear();
+            //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
+            var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($"Name: {selectedProduct.ProductName} | Id: {selectedProduct.ProductId} | Category Id: {selectedProduct.CategoryId} | Supplier Id: {selectedProduct.SupplierId}");
+            Console.WriteLine($"Quantity per Unit: {selectedProduct.QuantityPerUnit} | Unit Price: {selectedProduct.UnitPrice}");
+            Console.WriteLine($"Units in Stock: {selectedProduct.UnitsInStock} | Units on Order: {selectedProduct.UnitsOnOrder} | Reorder Level: {selectedProduct.ReorderLevel}");
+            if (selectedProduct.Discontinued)
+            {
+              Console.WriteLine($"{selectedProduct.ProductName} is discontinued");
+            }
+            else
+            {
+              Console.WriteLine($"{selectedProduct.ProductName} is not discontinued");
+            }
+
+            //allow user to read then leave
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Press 'Enter' to leave.");
+            Console.ReadLine();
+          }
+          else
+          {
+            //error handling
+            logger.Error("User entered an ID out of range");
+            Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+            Console.ReadLine();
+          }
+        }
+        else
+        {
+          //error handling
+          logger.Error("User entered invalid selection.");
+          Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+          Console.ReadLine();
+        }
+      }
       else
       {
         Console.Clear();
@@ -224,7 +292,6 @@ do
           break;
         }
       }
-
     }
   }
   // Edit / Append to a Category
