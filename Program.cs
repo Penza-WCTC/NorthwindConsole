@@ -653,7 +653,7 @@ do
         }
 
         //set supplier
-        var supplierName = db.Suppliers.Where(s=> s.SupplierId == productEdited.SupplierId).Select(s=> s.CompanyName).FirstOrDefault();
+        var supplierName = db.Suppliers.Where(s => s.SupplierId == productEdited.SupplierId).Select(s => s.CompanyName).FirstOrDefault();
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s supplier?\n{supplierName}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -882,6 +882,73 @@ do
   else if (choice == "5")
   {
     Console.Clear();
+    // display categories
+    var configuration = new ConfigurationBuilder()
+            .AddJsonFile($"appsettings.json");
+    var config = configuration.Build();
+
+    //pull query for categories
+    var db = new DataContext();
+    var queryC = db.Categories.OrderBy(c => c.CategoryId);
+    List<int> availableIds = new List<int>();
+
+    //display the categories
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"{queryC.Count()} records returned");
+    Console.ForegroundColor = ConsoleColor.Magenta;
+    foreach (var item in queryC)
+    {
+      Console.WriteLine($"\t{item.CategoryId}) - {item.CategoryName}");
+      availableIds.Add(item.CategoryId);
+    }
+
+    //allow user to pick what category they want more info on
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine("Which would you like to delete?");
+    Console.Write("?: ");
+    string? userTestSelection = Console.ReadLine();
+
+    //checks to see if the user input was an int, then stores the int for later use
+    if (int.TryParse(userTestSelection, out int userSelection))
+    {
+      //checks to see if the user input is in the list of available IDs
+      if (availableIds.Contains(userSelection))
+      {
+
+        Console.Clear();
+        //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
+        var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+        //get a query on products that are not discontinued and a part of the current category
+        var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"You have selected: {selectedCategory.CategoryName}, which stores {queryP.Count()} products.");
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Would you like to delete this category?\n\t(y/n)");
+        if (Console.ReadLine().ToLower() == "y")
+        {
+          foreach (var item in queryP)
+          {
+            item.Category = null;
+            item.CategoryId = null;
+          }
+          
+          db.Categories.Remove(selectedCategory);
+          db.SaveChanges();
+
+          Console.WriteLine("This Category has been Deleted.\nAll related Products no longer have a Category attatched.\nPlease press 'Enter' to return to the main menu.");
+          Console.ReadLine();
+        }
+      }
+      else
+      {
+        //error handling
+        logger.Error("User entered an ID out of range");
+        Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+        Console.ReadLine();
+      }
+    } 
   }
   // Delete a Product
   else if (choice == "6")
