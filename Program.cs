@@ -50,15 +50,11 @@ do
     Console.WriteLine("\t6) Products");
 
     Console.ForegroundColor = ConsoleColor.White;
-    Console.Write("Or would you like to ");
-    Console.ForegroundColor = ConsoleColor.Blue;
-    Console.Write("Seach ");
+    Console.WriteLine("Or would you like to ");
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine("Leave ");
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine("for a specific:");
-
-    Console.WriteLine("\t7) Category");
-    Console.WriteLine("\t8) Product");
-
+    Console.WriteLine("\tEnter a non-menu input.");
     Console.Write("?: ");
   }
 
@@ -1028,16 +1024,6 @@ do
       Console.ReadLine();
     }
   }
-  // Search for a Category
-  else if (choice == "7")
-  {
-    Console.Clear();
-  }
-  // Search for a Product
-  else if (choice == "8")
-  {
-    Console.Clear();
-  }
   else
   {
     Console.Clear();
@@ -1051,103 +1037,3 @@ do
 } while (true);
 
 logger.Info("Program ended");
-
-
-/*
-          if (choice == "1")
-          {
-            // display categories
-            var configuration = new ConfigurationBuilder()
-                    .AddJsonFile($"appsettings.json");
-
-            var config = configuration.Build();
-
-            var db = new DataContext();
-            var query = db.Categories.OrderBy(p => p.CategoryName);
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{query.Count()} records returned");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            foreach (var item in query)
-            {
-              Console.WriteLine($"{item.CategoryName} - {item.Description}");
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-          }
-          else if (choice == "2")
-          {
-            // Add category
-            Category category = new();
-            Console.WriteLine("Enter Category Name:");
-            category.CategoryName = Console.ReadLine()!;
-            Console.WriteLine("Enter the Category Description:");
-            category.Description = Console.ReadLine();
-            ValidationContext context = new ValidationContext(category, null, null);
-            List<ValidationResult> results = new List<ValidationResult>();
-
-            var isValid = Validator.TryValidateObject(category, context, results, true);
-            if (isValid)
-            {
-              var db = new DataContext();
-              // check for unique name
-              if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-              {
-                // generate validation error
-                isValid = false;
-                results.Add(new ValidationResult("Name exists", ["CategoryName"]));
-              }
-              else
-              {
-                logger.Info("Validation passed");
-                // TODO: save category to db
-              }
-            }
-            if (!isValid)
-            {
-              foreach (var result in results)
-              {
-                logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-              }
-            }
-          }
-          else if (choice == "3")
-          {
-            var db = new DataContext();
-            var query = db.Categories.OrderBy(p => p.CategoryId);
-
-            Console.WriteLine("Select the category whose products you want to display:");
-            Console.ForegroundColor = ConsoleColor.DarkRed;
-            foreach (var item in query)
-            {
-              Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
-            }
-            Console.ForegroundColor = ConsoleColor.White;
-            int id = int.Parse(Console.ReadLine()!);
-            Console.Clear();
-            logger.Info($"CategoryId {id} selected");
-            Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id)!;
-            Console.WriteLine($"{category.CategoryName} - {category.Description}");
-            foreach (Product p in category.Products)
-            {
-              Console.WriteLine($"\t{p.ProductName}");
-            }
-          }
-          else if (choice == "4")
-          {
-            var db = new DataContext();
-            var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
-            foreach (var item in query)
-            {
-              Console.WriteLine($"{item.CategoryName}");
-              foreach (Product p in item.Products)
-              {
-                Console.WriteLine($"\t{p.ProductName}");
-              }
-            }
-          }
-          else if (String.IsNullOrEmpty(choice))
-          {
-            break;
-          }
-          Console.WriteLine();
-  */
