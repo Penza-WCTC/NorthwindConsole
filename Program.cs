@@ -933,7 +933,7 @@ do
             item.Category = null;
             item.CategoryId = null;
           }
-          
+
           db.Categories.Remove(selectedCategory);
           db.SaveChanges();
 
@@ -948,12 +948,85 @@ do
         Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
         Console.ReadLine();
       }
-    } 
+    }
   }
   // Delete a Product
   else if (choice == "6")
   {
-    Console.Clear();
+   Console.Clear();
+    // display Products
+    var configuration = new ConfigurationBuilder()
+            .AddJsonFile($"appsettings.json");
+    var config = configuration.Build();
+
+    //pull query for products
+    var db = new DataContext();
+    var queryP = db.Products.OrderBy(p => p.ProductId);
+    List<int> availableIds = new List<int>();
+
+    //display the products
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"{queryP.Count()} records returned");
+    Console.ForegroundColor = ConsoleColor.Magenta;
+    foreach (var item in queryP)
+    {
+      Console.WriteLine($"\t{item.ProductId}) - {item.ProductName}");
+      availableIds.Add(item.ProductId);
+    }
+
+    //allow user to pick what products they want to delete
+    Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine("Which would you like to delete?");
+    Console.Write("?: ");
+    string? userTestSelection = Console.ReadLine();
+
+    //checks to see if the user input was an int, then stores the int for later use
+    if (int.TryParse(userTestSelection, out int userSelection))
+    {
+      //checks to see if the user input is in the list of available IDs
+      if (availableIds.Contains(userSelection))
+      {
+
+        Console.Clear();
+        //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
+        var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{selectedProduct.ProductName} has been selected.");
+
+        //allow user to chose
+        Console.ForegroundColor = ConsoleColor.White;
+        if (selectedProduct.Discontinued == false)
+        {
+          Console.WriteLine("Would you like to discontinue this product?\n\t(y/n).");
+          if (Console.ReadLine().ToLower() == "y")
+          {
+            selectedProduct.Discontinued = true;
+            db.SaveChanges();
+          }
+        }
+        else
+        {
+          Console.WriteLine("This product is listed as discontinued.\nPlease press 'Enter' to return to the main menu.");
+          Console.ReadLine();
+        }
+        
+      }
+      else
+      {
+        //error handling
+        logger.Error("User entered an ID out of range");
+        Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+        Console.ReadLine();
+      }
+    }
+    else
+    {
+      //error handling
+      logger.Error("User entered invalid selection.");
+      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+      Console.ReadLine();
+    }
   }
   // Search for a Category
   else if (choice == "7")
