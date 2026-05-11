@@ -50,10 +50,11 @@ do
     Console.WriteLine("\t6) Products");
 
     Console.ForegroundColor = ConsoleColor.White;
-    Console.WriteLine("Or would you like to ");
+    Console.Write("Or would you like to ");
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("Leave ");
+    Console.Write("Leave ");
     Console.ForegroundColor = ConsoleColor.White;
+    Console.WriteLine("the program: ");
     Console.WriteLine("\tEnter a non-menu input.");
     Console.Write("?: ");
   }
