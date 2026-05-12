@@ -92,10 +92,10 @@ do
     Console.WriteLine("Which would you like more information on?");
     Console.Write("?: ");
     string? userTestSelection = GetLegitUserInput();
+    logger.Info("ID {userTestSelection} selected.", userTestSelection);
 
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
-
-    if (userSelection != 0)
+    if (userSelection > 0)
     {
       Console.Clear();
       //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
@@ -117,7 +117,14 @@ do
       //allow user to leave
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine("Press enter to return to the main menu.");
+      logger.Info("User returned to Main menu");
       Console.ReadLine();
+    }else if(userSelection == -1)
+    {
+      logger.Error("ID out of range.");
+    }else if(userSelection == -2)
+    {
+      logger.Error("Non-Valid ID input.");
     }
 
   }
@@ -138,6 +145,7 @@ do
       Console.WriteLine("leave");
       Console.ForegroundColor = ConsoleColor.White;
       choice = Console.ReadLine();
+      logger.Info("Inner Menu option {choice} selected", choice);
 
       var configuration = new ConfigurationBuilder()
             .AddJsonFile($"appsettings.json");
@@ -160,6 +168,7 @@ do
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press Enter to filter again");
+        logger.Info("User returned to Inner menu");
         Console.ReadLine();
       }
       //active products
@@ -178,6 +187,7 @@ do
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press Enter to filter again");
+        logger.Info("User returned to Inner menu");
         Console.ReadLine();
       }
       //discontinued products
@@ -196,6 +206,7 @@ do
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Press Enter to filter again");
+        logger.Info("User returned to Inner menu");
         Console.ReadLine();
       }
       else if (choice == "4")
@@ -219,10 +230,11 @@ do
         Console.WriteLine("Which would you like to see all data for?");
         Console.Write("?: ");
         string? userTestSelection = GetLegitUserInput();
+        logger.Info("ID {userTestSelection} selected.", userTestSelection);
 
         int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
-        if (userSelection != 0)
+        if (userSelection > 0)
         {
           Console.Clear();
           //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
@@ -244,7 +256,14 @@ do
           //allow user to read then leave
           Console.ForegroundColor = ConsoleColor.White;
           Console.WriteLine("Press 'Enter' to leave.");
+          logger.Info("User returned to Inner menu");
           Console.ReadLine();
+        }else if(userSelection == -1)
+        {
+          logger.Error("ID out of range");
+        }else if(userSelection == -2)
+        {
+          logger.Error("Non-Valid ID Input");
         }
       }
       else
@@ -254,7 +273,7 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
-          logger.Info("Exited Product Info");
+          logger.Info("User returned to Main menu");
           break;
         }
       }
@@ -270,6 +289,7 @@ do
     Console.WriteLine("\t2) Edit an existing Category");
     Console.Write("?: ");
     choice = Console.ReadLine();
+    logger.Info("Inner Menu option {choice} selected", choice);
 
     var configuration = new ConfigurationBuilder()
           .AddJsonFile($"appsettings.json");
@@ -288,10 +308,12 @@ do
 
         if (name.Length > 15)
         {
+          logger.Error("User entered {name}, which is longer than 15 characters",name);
           Console.WriteLine("Make sure that it is less than 15 letters!");
         }
         else
         {
+          logger.Info("User entered {name} as the Category's name", name);
           break;
         }
       }
@@ -299,11 +321,13 @@ do
       Console.WriteLine("Enter a new description for your Category");
       Console.Write(": ");
       var description = Console.ReadLine();
+      logger.Info("User entered {description} as the Category's description", description);
 
       Category category = new Category { CategoryName = name, Description = description };
 
       if (!db.Categories.Any(c => c.CategoryName == category.CategoryName))
       {
+        logger.Info("New Category succesfully added");
         db.Categories.Add(category);
         db.SaveChanges();
       }
@@ -329,9 +353,11 @@ do
       Console.WriteLine("Which would you like to edit?");
       Console.Write("?: ");
       var userTestSelection = GetLegitUserInput();
+      logger.Info("ID {userTestSelection} selected.", userTestSelection);
+
 
       int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
-      if (userSelection != 0)
+      if (userSelection > 0)
       {
         var name = "";
         var description = "";
@@ -343,6 +369,7 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit the Category's Name.");
           Console.WriteLine("Enter your new name for the Category.\nYour name cannot be longer than 15 letters!");
           while (true)
           {
@@ -351,10 +378,12 @@ do
 
             if (name.Length > 15)
             {
+              logger.Error("User entered {name}, which is longer than 15 characters", name);
               Console.WriteLine("Make sure that it is less than 15 letters!");
             }
             else
             {
+              logger.Info("User ented {name}, as the Category's new name", name);
               break;
             }
           }
@@ -364,9 +393,13 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit the Category's Description.");
+          
           Console.WriteLine("Enter a new description for your Category");
           Console.Write(": ");
           description = Console.ReadLine();
+        
+          logger.Info("User entered {description}, as the Category's new description", description);
         }
 
         if (name != "")
@@ -380,7 +413,14 @@ do
           selectedCategory.Description = description;
         }
 
+        logger.Info("Category Updated");
         db.SaveChanges();
+      }else if(userSelection == -1)
+      {
+        logger.Error("Id out of range");
+      }else if(userSelection == -2)
+      {
+        logger.Error("Non-Valid ID Input");
       }
     }
     else
@@ -390,6 +430,7 @@ do
       Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
       Console.ReadLine();
     }
+    logger.Info("User returned to Main menu");
   }
   // Edit / Append to a Product
   else if (choice == "4")
@@ -401,6 +442,7 @@ do
     Console.WriteLine("\t2) Edit an existing Product");
     Console.Write("?: ");
     choice = Console.ReadLine();
+    logger.Info("Inner Menu option {choice} selected", choice);
 
     var configuration = new ConfigurationBuilder()
           .AddJsonFile($"appsettings.json");
@@ -424,6 +466,8 @@ do
       Console.Write("?: ");
       productName = GetLegitUserInput();
 
+      logger.Info("User entered {productName}, as the Product's name", productName);
+
       //set supplier. This is a special situation so we don't use UserChoiceWithinList()
       {
         var queryS = db.Suppliers.OrderBy(s => s.SupplierId);
@@ -443,6 +487,7 @@ do
         Console.WriteLine("Who is the supplier?\nIf they are not listed, please type NL.");
         Console.Write("?: ");
         var userTestSelection = GetLegitUserInput();
+        logger.Info("ID {userTestSelection} selected", userTestSelection);
 
         //checks to see if the user input was an int, then stores the int for later use
         if (int.TryParse(userTestSelection, out int userSelection))
@@ -451,11 +496,12 @@ do
           if (availableIds.Contains(userSelection))
           {
             supplierId = userSelection;
+            logger.Info("User entered {supplierId}, as the Product's supplier ID", supplierId);
           }
           else
           {
             //error handling
-            logger.Error("User entered an ID out of range");
+            logger.Error("ID out of range");
             Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
             Console.ReadLine();
           }
@@ -464,12 +510,12 @@ do
         {
           if (userTestSelection.ToLower() == "nl")
           {
-            //log that the user chose not have any supplier chosen
+            logger.Info("User states that supplier is not listed");
           }
           else
           {
             //error handling
-            logger.Error("User entered invalid selection.");
+            logger.Error("Non-Valid ID Input");
             Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
             Console.ReadLine();
           }
@@ -494,6 +540,7 @@ do
         Console.WriteLine("What is the category?\nIf it is not listed, please type NL.");
         Console.Write("?: ");
         var userTestSelection = GetLegitUserInput();
+        logger.Info("ID {userTestSelection} selected.", userTestSelection);
 
         //checks to see if the user input was an int, then stores the int for later use
         if (int.TryParse(userTestSelection, out int userSelection))
@@ -503,11 +550,12 @@ do
           {
             var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
             categoryId = selectedCategory.CategoryId;
+            logger.Info("User entered {categoryId}, as the Product's categoryId", categoryId);
           }
           else
           {
             //error handling
-            logger.Error("User entered an ID out of range");
+            logger.Error("ID out of range");
             Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
             Console.ReadLine();
           }
@@ -516,21 +564,24 @@ do
         {
           if (userTestSelection.ToLower() == "nl")
           {
-            //log that the user chose not have any category chosen
+            logger.Info("User states that category is not listed");
           }
           else
           {
             //error handling
-            logger.Error("User entered invalid selection.");
+            logger.Error("Non-Valid ID Input");
             Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
             Console.ReadLine();
           }
         }
       }
+
       //sets quantity per unit
       Console.WriteLine($"What is {productName}'s quantity per unit?");
       Console.Write("?: ");
       quantityPerUnit = Console.ReadLine();
+
+      logger.Info("User entered {quantityPerUnit}, as the Product's quanity per unit", quantityPerUnit);
 
       //sets unit price
       Console.WriteLine($"What is {productName}'s unit price?");
@@ -544,6 +595,8 @@ do
         unitPrice = null;
       }
 
+      logger.Info("User entered {unitPrice}, as the Product's unit price", unitPrice);
+
       //sets units in stock
       Console.WriteLine($"How many {productName}s are in stock?");
       Console.Write("?: ");
@@ -555,6 +608,8 @@ do
       {
         unitsInStock = null;
       }
+
+      logger.Info("User entered {unitsInStock}, as the Product's units in stock", unitsInStock);
 
       //sets units on order
       Console.WriteLine($"How many {productName}s are on order?");
@@ -568,6 +623,8 @@ do
         unitsOnOrder = null;
       }
 
+      logger.Info("User entered {unitsOnOrder}, as the Product's units on order", unitsOnOrder);
+
       //sets reorder level
       Console.WriteLine($"What is the reorder level of {productName}?");
       Console.Write("?: ");
@@ -579,6 +636,8 @@ do
       {
         reorderLevel = null;
       }
+
+      logger.Info("User entered {reorderLevel}, as the Product's reorder level", reorderLevel);
 
       //sets discontinued
       Console.WriteLine($"Is {productName} discontinued?\n\t(y/n)");
@@ -598,9 +657,11 @@ do
         }
         else
         {
+          logger.Error("User entered {holder}, which is not y / n", holder);
           Console.WriteLine("Please use (y/n)");
         }
       }
+      logger.Info("User entered {discontinued}, as the Product's discontinued status", discontinued);
 
       //creates the new product
       Product product = new Product { ProductName = productName, SupplierId = supplierId, CategoryId = categoryId, QuantityPerUnit = quantityPerUnit, UnitPrice = unitPrice, UnitsInStock = unitsInStock, UnitsOnOrder = unitsOnOrder, ReorderLevel = reorderLevel, Discontinued = discontinued };
@@ -610,6 +671,7 @@ do
       {
         db.Products.Add(product);
         db.SaveChanges();
+        logger.Info("New Product Added");
       }
     }
     else if (choice == "2")
@@ -634,11 +696,19 @@ do
       Console.Write("?: ");
       var userTestSelection = GetLegitUserInput();
 
+      logger.Info("ID {userTestSelection} selected.", userTestSelection);
+
       int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
-      if (userSelection != 0)
+      if (userSelection > 0)
       {
         productEdited = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
+      }else if(userSelection == -1)
+      {
+        logger.Error("ID out of range");
+      }else if(userSelection == -2)
+      {
+        logger.Error("Non-Valid ID Input");
       }
 
 
@@ -649,9 +719,13 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit name");
           Console.WriteLine("What would you like your new product's name to be?");
           Console.Write("?: ");
-          productEdited.ProductName = GetLegitUserInput();
+          var productName = GetLegitUserInput();
+          productEdited.ProductName = productName;
+
+          logger.Info("User entered {productName}, as the Product's new name", productName);
         }
 
         //set supplier. Special situation so we don't use UserChoiceWithinList()
@@ -661,6 +735,8 @@ do
         if (GetLegitUserInput().ToLower() == "y")
         {
           {
+            logger.Info("User choses to edit supplier");
+
             var queryS = db.Suppliers.OrderBy(s => s.SupplierId);
             availableIds = new List<int>();
 
@@ -679,6 +755,8 @@ do
             Console.Write("?: ");
             userTestSelection = GetLegitUserInput();
 
+            logger.Info("ID {userTestSelection} seelcted.", userTestSelection);
+
             //checks to see if the user input was an int, then stores the int for later use
             if (int.TryParse(userTestSelection, out userSelection))
             {
@@ -686,11 +764,12 @@ do
               if (availableIds.Contains(userSelection))
               {
                 productEdited.SupplierId = userSelection;
+                logger.Info("User entered {userSelection}, as the Product's new supplier ID", userSelection);
               }
               else
               {
                 //error handling
-                logger.Error("User entered an ID out of range");
+                logger.Error("ID out of range");
                 Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
                 Console.ReadLine();
               }
@@ -699,12 +778,12 @@ do
             {
               if (userTestSelection.ToLower() == "nl")
               {
-                //log that the user chose not have any supplier chosen
+                logger.Error("User states that supplier is not listed");
               }
               else
               {
                 //error handling
-                logger.Error("User entered invalid selection.");
+                logger.Error("Non-Valid ID Input");
                 Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
                 Console.ReadLine();
               }
@@ -718,6 +797,7 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit category");
           {
             var queryC = db.Categories.OrderBy(s => s.CategoryId);
             availableIds = new List<int>();
@@ -737,19 +817,22 @@ do
             Console.Write("?: ");
             userTestSelection = GetLegitUserInput();
 
+            logger.Info("ID {userTestSelection} selected", userTestSelection);
+
             //checks to see if the user input was an int, then stores the int for later use
             if (int.TryParse(userTestSelection, out userSelection))
             {
               //checks to see if the user input is in the list of available IDs
               if (availableIds.Contains(userSelection))
               {
-                var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
-                productEdited.CategoryId = selectedCategory.CategoryId;
+                productEdited.CategoryId = userSelection;
+
+                logger.Info("User entered {userSelection}, as the Product's new category ID", userSelection);
               }
               else
               {
                 //error handling
-                logger.Error("User entered an ID out of range");
+                logger.Error("ID out of range");
                 Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
                 Console.ReadLine();
               }
@@ -758,12 +841,12 @@ do
             {
               if (userTestSelection.ToLower() == "nl")
               {
-                //log that the user chose not have any category chosen
+                logger.Info("User states that category is not listed");
               }
               else
               {
                 //error handling
-                logger.Error("User entered invalid selection.");
+                logger.Error("Non-Valid ID Input");
                 Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
                 Console.ReadLine();
               }
@@ -776,10 +859,14 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+        logger.Info("User choses to edit quantity per unit");
           //sets quantity per unit
           Console.WriteLine($"What is {productEdited.ProductName}'s quantity per unit?");
           Console.Write("?: ");
-          productEdited.QuantityPerUnit = Console.ReadLine();
+          var quantityPerUnit = Console.ReadLine();
+          productEdited.QuantityPerUnit = quantityPerUnit;
+          
+          logger.Info("User entered {quantityPerUnit}, as the Product's new quantity per unit", quantityPerUnit);
         }
 
         //edits unit price.
@@ -787,15 +874,18 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit unit price");
           Console.WriteLine($"What is {productEdited.ProductName}'s unit price?");
           Console.Write("?: ");
           if (decimal.TryParse(Console.ReadLine(), out decimal decimalHolder))
           {
             productEdited.UnitPrice = decimalHolder;
+            logger.Info("User entered {decimalHolder}, as the Product's new unit price", decimalHolder);
           }
           else
           {
             productEdited.UnitPrice = null;
+            logger.Info("User entered a null value as the Product's new unit price");
           }
         }
 
@@ -804,15 +894,18 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit units in stock");
           Console.WriteLine($"How many {productEdited.ProductName}s are in stock?");
           Console.Write("?: ");
           if (short.TryParse(Console.ReadLine(), out short shortHolder))
           {
             productEdited.UnitsInStock = shortHolder;
+            logger.Info("User entered {shortHolder} as the Product's new units in stock");
           }
           else
           {
             productEdited.UnitsInStock = null;
+            logger.Info("User entred a null value as the Product's new units in stock");
           }
         }
 
@@ -821,15 +914,18 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit units on order");
           Console.WriteLine($"How many {productEdited.ProductName}s are on order?");
           Console.Write("?: ");
           if (short.TryParse(Console.ReadLine(), out short shortHolder))
           {
             productEdited.UnitsOnOrder = shortHolder;
+            logger.Info("User entred {shortHolder} as the Product's new units on order", shortHolder);
           }
           else
           {
             productEdited.UnitsOnOrder = null;
+            logger.Info("User entered a null value as the Product's new units on order");
           }
         }
 
@@ -838,15 +934,18 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit the reorder level");
           Console.WriteLine($"What is the reorder level of {productEdited.ProductName}?");
           Console.Write("?: ");
           if (short.TryParse(Console.ReadLine(), out short shortHolder))
           {
             productEdited.ReorderLevel = shortHolder;
+            logger.Info("User entered {shortHolder} as the Product's new reorder level", shortHolder);
           }
           else
           {
             productEdited.ReorderLevel = null;
+            logger.Info("User entered a null value as the Product's new reorder level");
           }
         }
 
@@ -855,6 +954,7 @@ do
         Console.Write("?: ");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to edit the discontinued status");
           Console.WriteLine($"Is {productEdited.ProductName} discontinued?\n\t(y/n)");
           while (true)
           {
@@ -863,23 +963,28 @@ do
             if (holder.ToLower() == "y")
             {
               productEdited.Discontinued = true;
+              logger.Info("User entered true, as the Product's discontinued status");
               break;
             }
             else if (holder.ToLower() == "n")
             {
               productEdited.Discontinued = false;
+              logger.Info("User entered false, as the Product's discontinued status");
               break;
             }
             else
             {
+              logger.Info("User entered {holder}, which is not y / n", holder);
               Console.WriteLine("Please use (y/n)");
             }
           }
         }
 
+        logger.Info("User updated Product");
         db.SaveChanges();
       }
     }
+    logger.Info("User returned to Main menu");
   }
   // Delete a Category
   else if (choice == "5")
@@ -911,10 +1016,12 @@ do
     Console.Write("?: ");
     string? userTestSelection = GetLegitUserInput();
 
+    logger.Info("ID {userTestSelection} selected", userTestSelection);
+
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
     //checks to see if the user input was an int, then stores the int for later use
-    if (userSelection != 0)
+    if (userSelection > 0)
     {
       Console.Clear();
       //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
@@ -929,6 +1036,7 @@ do
       Console.WriteLine("Would you like to delete this category?\n\t(y/n)");
       if (GetLegitUserInput().ToLower() == "y")
       {
+        logger.Info("User choses to delete category");
         foreach (var item in queryP)
         {
           item.Category = null;
@@ -941,7 +1049,14 @@ do
         Console.WriteLine("This Category has been Deleted.\nAll related Products no longer have a Category attatched.\nPlease press 'Enter' to return to the main menu.");
         Console.ReadLine();
       }
+    }else if(userSelection == -1)
+    {
+      logger.Info("ID out of range");
+    }else if(userSelection == -2)
+    {
+      logger.Info("Non-Valid ID Input");
     }
+    logger.Info("User returned to Main menu");
   }
   // Delete a Product
   else if (choice == "6")
@@ -973,10 +1088,12 @@ do
     Console.Write("?: ");
     string? userTestSelection = GetLegitUserInput();
 
+    logger.Info("ID {userTestSelection} selected", userTestSelection);
+
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
     //checks to see if the user input was an int, then stores the int for later use
-    if (userSelection != 0)
+    if (userSelection > 0)
     {
       Console.Clear();
       //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
@@ -992,17 +1109,25 @@ do
         Console.WriteLine("Would you like to discontinue this product?\n\t(y/n).");
         if (GetLegitUserInput().ToLower() == "y")
         {
+          logger.Info("User choses to discontinue product");
           selectedProduct.Discontinued = true;
           db.SaveChanges();
         }
       }
       else
       {
+        logger.Info("User has selected a product that is already discontinued.");
         Console.WriteLine("This product is listed as discontinued.\nPlease press 'Enter' to return to the main menu.");
         Console.ReadLine();
       }
-
+    }else if(userSelection == -1)
+    {
+      logger.Error("ID out of range");
+    }else if(userSelection == -2)
+    {
+      logger.Error("Non-Valid ID Input");
     }
+    logger.Info("User returned to the Main menu");
   }
   else
   {
@@ -1032,14 +1157,14 @@ static int UserChoiceWithinList(string userTestSelection, List<int> availableIds
     {
       Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
       Console.ReadLine();
-      return 0;
+      return -1;
     }
   }
   else
   {
     Console.WriteLine("That is not an ID. Please enter an ID.\nPress Enter to return to the main menu.");
     Console.ReadLine();
-    return 0;
+    return -2;
   }
 }
 
@@ -1056,7 +1181,7 @@ static String GetLegitUserInput()
     }
     else
     {
-      Console.WriteLine("Please enter a value.\n?: ");
+      Console.Write("Please enter a value.\n?: ");
     }
   }
 }
