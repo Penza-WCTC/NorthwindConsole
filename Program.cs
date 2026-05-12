@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Identity.Client;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using NLog.LayoutRenderers;
 string path = Directory.GetCurrentDirectory() + "//nlog.config";
 
 // create instance of Logger
@@ -92,50 +93,33 @@ do
     Console.Write("?: ");
     string? userTestSelection = Console.ReadLine();
 
-    //checks to see if the user input was an int, then stores the int for later use
-    if (int.TryParse(userTestSelection, out int userSelection))
+    int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+
+    if (userSelection != 0)
     {
-      //checks to see if the user input is in the list of available IDs
-      if (availableIds.Contains(userSelection))
+      Console.Clear();
+      //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
+      var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+      //get a query on products that are not discontinued and a part of the current category
+      var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
+
+      Console.ForegroundColor = ConsoleColor.Green;
+      Console.WriteLine($"{queryP.Count()} records returned");
+      Console.WriteLine($"Products from {selectedCategory.CategoryName}, which stores products catagorized as {selectedCategory.Description}:");
+
+      //displays the information to the user
+      Console.ForegroundColor = ConsoleColor.Magenta;
+      foreach (var item in queryP)
       {
-
-        Console.Clear();
-        //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
-        var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
-        //get a query on products that are not discontinued and a part of the current category
-        var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
-
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"{queryP.Count()} records returned");
-        Console.WriteLine($"Products from {selectedCategory.CategoryName}, which stores products catagorized as {selectedCategory.Description}:");
-
-        //displays the information to the user
-        Console.ForegroundColor = ConsoleColor.Magenta;
-        foreach (var item in queryP)
-        {
-          Console.WriteLine($"\t{item.ProductId}) {item.ProductName}: ${item.UnitPrice} ");
-        }
-
-        //allow user to leave
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("Press enter to return to the main menu.");
-        Console.ReadLine();
+        Console.WriteLine($"\t{item.ProductId}) {item.ProductName}: ${item.UnitPrice} ");
       }
-      else
-      {
-        //error handling
-        logger.Error("User entered an ID out of range");
-        Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
-        Console.ReadLine();
-      }
-    }
-    else
-    {
-      //error handling
-      logger.Error("User entered invalid selection.");
-      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+
+      //allow user to leave
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine("Press enter to return to the main menu.");
       Console.ReadLine();
     }
+
   }
   // View Specific Product Information
   else if (choice == "2")
@@ -236,48 +220,30 @@ do
         Console.Write("?: ");
         string? userTestSelection = Console.ReadLine();
 
-        //checks to see if the user input was an int, then stores the int for later use
-        if (int.TryParse(userTestSelection, out int userSelection))
+        int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+
+        if (userSelection != 0)
         {
-          //checks to see if the user input is in the list of available IDs
-          if (availableIds.Contains(userSelection))
+          Console.Clear();
+          //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
+          var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
+
+          Console.ForegroundColor = ConsoleColor.White;
+          Console.WriteLine($"Name: {selectedProduct.ProductName} | Id: {selectedProduct.ProductId} | Category Id: {selectedProduct.CategoryId} | Supplier Id: {selectedProduct.SupplierId}");
+          Console.WriteLine($"Quantity per Unit: {selectedProduct.QuantityPerUnit} | Unit Price: {selectedProduct.UnitPrice}");
+          Console.WriteLine($"Units in Stock: {selectedProduct.UnitsInStock} | Units on Order: {selectedProduct.UnitsOnOrder} | Reorder Level: {selectedProduct.ReorderLevel}");
+          if (selectedProduct.Discontinued)
           {
-
-            Console.Clear();
-            //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
-            var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
-
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"Name: {selectedProduct.ProductName} | Id: {selectedProduct.ProductId} | Category Id: {selectedProduct.CategoryId} | Supplier Id: {selectedProduct.SupplierId}");
-            Console.WriteLine($"Quantity per Unit: {selectedProduct.QuantityPerUnit} | Unit Price: {selectedProduct.UnitPrice}");
-            Console.WriteLine($"Units in Stock: {selectedProduct.UnitsInStock} | Units on Order: {selectedProduct.UnitsOnOrder} | Reorder Level: {selectedProduct.ReorderLevel}");
-            if (selectedProduct.Discontinued)
-            {
-              Console.WriteLine($"{selectedProduct.ProductName} is discontinued");
-            }
-            else
-            {
-              Console.WriteLine($"{selectedProduct.ProductName} is not discontinued");
-            }
-
-            //allow user to read then leave
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("Press 'Enter' to leave.");
-            Console.ReadLine();
+            Console.WriteLine($"{selectedProduct.ProductName} is discontinued");
           }
           else
           {
-            //error handling
-            logger.Error("User entered an ID out of range");
-            Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
-            Console.ReadLine();
+            Console.WriteLine($"{selectedProduct.ProductName} is not discontinued");
           }
-        }
-        else
-        {
-          //error handling
-          logger.Error("User entered invalid selection.");
-          Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
+
+          //allow user to read then leave
+          Console.ForegroundColor = ConsoleColor.White;
+          Console.WriteLine("Press 'Enter' to leave.");
           Console.ReadLine();
         }
       }
@@ -364,77 +330,58 @@ do
       Console.Write("?: ");
       var userTestSelection = Console.ReadLine();
 
-      //checks to see if the user input was an int, then stores the int for later use
-      if (int.TryParse(userTestSelection, out int userSelection))
+      int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+      if (userSelection != 0)
       {
-        //checks to see if the user input is in the list of available IDs
-        if (availableIds.Contains(userSelection))
+        var name = "";
+        var description = "";
+
+        Console.Clear();
+        //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
+        var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+        Console.WriteLine($"{selectedCategory.CategoryName} - This is the current name, would you like to change it?\n\t(y/n)");
+        Console.Write("?: ");
+        if (Console.ReadLine().ToLower() == "y")
         {
-          var name = "";
-          var description = "";
-
-          Console.Clear();
-          //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
-          var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
-          Console.WriteLine($"{selectedCategory.CategoryName} - This is the current name, would you like to change it?\n\t(y/n)");
-          Console.Write("?: ");
-          if (Console.ReadLine().ToLower() == "y")
+          Console.WriteLine("Enter your new name for the Category.\nYour name cannot be longer than 15 letters!");
+          while (true)
           {
-            Console.WriteLine("Enter your new name for the Category.\nYour name cannot be longer than 15 letters!");
-            while (true)
-            {
-              Console.Write(": ");
-              name = Console.ReadLine();
+            Console.Write(": ");
+            name = Console.ReadLine();
 
-              if (name.Length > 15)
-              {
-                Console.WriteLine("Make sure that it is less than 15 letters!");
-              }
-              else
-              {
-                break;
-              }
+            if (name.Length > 15)
+            {
+              Console.WriteLine("Make sure that it is less than 15 letters!");
+            }
+            else
+            {
+              break;
             }
           }
-
-          Console.WriteLine($"{selectedCategory.Description}\nThis is the current description, would you like to change it?\n\t(y/n)");
-          Console.Write("?: ");
-          if (Console.ReadLine().ToLower() == "y")
-          {
-            Console.WriteLine("Enter a new description for your Category");
-            Console.Write(": ");
-            description = Console.ReadLine();
-          }
-
-          if (name != "")
-          {
-            selectedCategory.CategoryName = name;
-          }
-
-
-          if (description != "")
-          {
-            selectedCategory.Description = description;
-          }
-
-          db.SaveChanges();
         }
-        else
+
+        Console.WriteLine($"{selectedCategory.Description}\nThis is the current description, would you like to change it?\n\t(y/n)");
+        Console.Write("?: ");
+        if (Console.ReadLine().ToLower() == "y")
         {
-          //error handling
-          logger.Error("User entered an ID out of range");
-          Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
-          Console.ReadLine();
+          Console.WriteLine("Enter a new description for your Category");
+          Console.Write(": ");
+          description = Console.ReadLine();
         }
-      }
-      else
-      {
-        //error handling
-        logger.Error("User entered invalid selection.");
-        Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
-        Console.ReadLine();
-      }
 
+        if (name != "")
+        {
+          selectedCategory.CategoryName = name;
+        }
+
+
+        if (description != "")
+        {
+          selectedCategory.Description = description;
+        }
+
+        db.SaveChanges();
+      }
     }
     else
     {
@@ -477,7 +424,7 @@ do
       Console.Write("?: ");
       productName = Console.ReadLine();
 
-      //set supplier
+      //set supplier. This is a special situation so we don't use UserChoiceWithinList()
       {
         var queryS = db.Suppliers.OrderBy(s => s.SupplierId);
         List<int> availableIds = new List<int>();
@@ -528,7 +475,7 @@ do
           }
         }
       }
-      //sets categories
+      //set categories. This is a special situation so we don't use UserChoiceWithinList()
       {
         var queryC = db.Categories.OrderBy(s => s.CategoryId);
         List<int> availableIds = new List<int>();
@@ -585,6 +532,7 @@ do
       Console.Write("?: ");
       quantityPerUnit = Console.ReadLine();
 
+      //sets unit price
       Console.WriteLine($"What is {productName}'s unit price?");
       Console.Write("?: ");
       if (decimal.TryParse(Console.ReadLine(), out decimal decimalHolder))
@@ -596,6 +544,7 @@ do
         unitPrice = null;
       }
 
+      //sets units in stock
       Console.WriteLine($"How many {productName}s are in stock?");
       Console.Write("?: ");
       if (short.TryParse(Console.ReadLine(), out short shortHolder))
@@ -607,6 +556,7 @@ do
         unitsInStock = null;
       }
 
+      //sets units on order
       Console.WriteLine($"How many {productName}s are on order?");
       Console.Write("?: ");
       if (short.TryParse(Console.ReadLine(), out shortHolder))
@@ -618,6 +568,7 @@ do
         unitsOnOrder = null;
       }
 
+      //sets reorder level
       Console.WriteLine($"What is the reorder level of {productName}?");
       Console.Write("?: ");
       if (short.TryParse(Console.ReadLine(), out shortHolder))
@@ -629,6 +580,7 @@ do
         reorderLevel = null;
       }
 
+      //sets discontinued
       Console.WriteLine($"Is {productName} discontinued?\n\t(y/n)");
       while (true)
       {
@@ -650,8 +602,10 @@ do
         }
       }
 
+      //creates the new product
       Product product = new Product { ProductName = productName, SupplierId = supplierId, CategoryId = categoryId, QuantityPerUnit = quantityPerUnit, UnitPrice = unitPrice, UnitsInStock = unitsInStock, UnitsOnOrder = unitsOnOrder, ReorderLevel = reorderLevel, Discontinued = discontinued };
 
+      //if that product name is not already there, then add it.
       if (!db.Products.Any(c => c.ProductName == product.ProductName))
       {
         db.Products.Add(product);
@@ -680,29 +634,13 @@ do
       Console.Write("?: ");
       var userTestSelection = Console.ReadLine();
 
-      //checks to see if the user input was an int, then stores the int for later use
-      if (int.TryParse(userTestSelection, out int userSelection))
+      int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+
+      if (userSelection != 0)
       {
-        //checks to see if the user input is in the list of available IDs
-        if (availableIds.Contains(userSelection))
-        {
-          productEdited = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
-        }
-        else
-        {
-          //error handling
-          logger.Error("User entered an ID out of range");
-          Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
-          Console.ReadLine();
-        }
+        productEdited = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
       }
-      else
-      {
-        //error handling
-        logger.Error("User entered invalid selection.");
-        Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
-        Console.ReadLine();
-      }
+
 
       if (productEdited.ProductId != null)
       {
@@ -716,7 +654,7 @@ do
           productEdited.ProductName = Console.ReadLine();
         }
 
-        //set supplier
+        //set supplier. Special situation so we don't use UserChoiceWithinList()
         var supplierName = db.Suppliers.Where(s => s.SupplierId == productEdited.SupplierId).Select(s => s.CompanyName).FirstOrDefault();
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s supplier?\n{supplierName}\n\t(y/n)");
         Console.Write("?: ");
@@ -773,12 +711,13 @@ do
             }
           }
         }
+
+        //edits category. Special situation so we don't use UserChoiceWithinList().
         var categoryName = db.Categories.Where(c => c.CategoryId == productEdited.CategoryId).Select(c => c.CategoryName).FirstOrDefault();
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s category?\n{categoryName}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
         {
-          //sets categories
           {
             var queryC = db.Categories.OrderBy(s => s.CategoryId);
             availableIds = new List<int>();
@@ -831,6 +770,8 @@ do
             }
           }
         }
+
+        //edits quantity per unit.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s quantity per unit?\n{productEdited.QuantityPerUnit}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -841,6 +782,7 @@ do
           productEdited.QuantityPerUnit = Console.ReadLine();
         }
 
+        //edits unit price.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s unit price?\n{productEdited.UnitPrice}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -857,6 +799,7 @@ do
           }
         }
 
+        //edits units in stock.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s units in stock?\n{productEdited.UnitsInStock}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -873,6 +816,7 @@ do
           }
         }
 
+        //edits units on order
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s units on order?\n{productEdited.UnitsOnOrder}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -889,6 +833,7 @@ do
           }
         }
 
+        //edits reorder level
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s reorder level?\n{productEdited.ReorderLevel}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -905,6 +850,7 @@ do
           }
         }
 
+        //edits discontinued status
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s disconinued status?\n{productEdited.Discontinued}\n\t(y/n)");
         Console.Write("?: ");
         if (Console.ReadLine().ToLower() == "y")
@@ -933,13 +879,6 @@ do
 
         db.SaveChanges();
       }
-    }
-    else
-    {
-      //error handling
-      logger.Error("User entered invalid selection.");
-      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
-      Console.ReadLine();
     }
   }
   // Delete a Category
@@ -972,44 +911,34 @@ do
     Console.Write("?: ");
     string? userTestSelection = Console.ReadLine();
 
+    int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+
     //checks to see if the user input was an int, then stores the int for later use
-    if (int.TryParse(userTestSelection, out int userSelection))
+    if (userSelection != 0)
     {
-      //checks to see if the user input is in the list of available IDs
-      if (availableIds.Contains(userSelection))
+      Console.Clear();
+      //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
+      var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
+      //get a query on products that are not discontinued and a part of the current category
+      var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
+
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine($"You have selected: {selectedCategory.CategoryName}, which stores {queryP.Count()} products.");
+
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine("Would you like to delete this category?\n\t(y/n)");
+      if (Console.ReadLine().ToLower() == "y")
       {
-
-        Console.Clear();
-        //gets the first/default category from the user selected ID. CategoryId is the primary key, so only one should be returned
-        var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
-        //get a query on products that are not discontinued and a part of the current category
-        var queryP = db.Products.Where(p => p.CategoryId == userSelection && p.Discontinued == false);
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"You have selected: {selectedCategory.CategoryName}, which stores {queryP.Count()} products.");
-
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("Would you like to delete this category?\n\t(y/n)");
-        if (Console.ReadLine().ToLower() == "y")
+        foreach (var item in queryP)
         {
-          foreach (var item in queryP)
-          {
-            item.Category = null;
-            item.CategoryId = null;
-          }
-
-          db.Categories.Remove(selectedCategory);
-          db.SaveChanges();
-
-          Console.WriteLine("This Category has been Deleted.\nAll related Products no longer have a Category attatched.\nPlease press 'Enter' to return to the main menu.");
-          Console.ReadLine();
+          item.Category = null;
+          item.CategoryId = null;
         }
-      }
-      else
-      {
-        //error handling
-        logger.Error("User entered an ID out of range");
-        Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+
+        db.Categories.Remove(selectedCategory);
+        db.SaveChanges();
+
+        Console.WriteLine("This Category has been Deleted.\nAll related Products no longer have a Category attatched.\nPlease press 'Enter' to return to the main menu.");
         Console.ReadLine();
       }
     }
@@ -1017,7 +946,7 @@ do
   // Delete a Product
   else if (choice == "6")
   {
-   Console.Clear();
+    Console.Clear();
     // display Products
     var configuration = new ConfigurationBuilder()
             .AddJsonFile($"appsettings.json");
@@ -1044,52 +973,35 @@ do
     Console.Write("?: ");
     string? userTestSelection = Console.ReadLine();
 
+    int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
+
     //checks to see if the user input was an int, then stores the int for later use
-    if (int.TryParse(userTestSelection, out int userSelection))
+    if (userSelection != 0)
     {
-      //checks to see if the user input is in the list of available IDs
-      if (availableIds.Contains(userSelection))
+      Console.Clear();
+      //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
+      var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
+
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine($"{selectedProduct.ProductName} has been selected.");
+
+      //allow user to chose
+      Console.ForegroundColor = ConsoleColor.White;
+      if (selectedProduct.Discontinued == false)
       {
-
-        Console.Clear();
-        //gets the first/default Product from the user selected ID. productId is the primary key, so only one should be returned
-        var selectedProduct = db.Products.FirstOrDefault(p => p.ProductId == userSelection);
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{selectedProduct.ProductName} has been selected.");
-
-        //allow user to chose
-        Console.ForegroundColor = ConsoleColor.White;
-        if (selectedProduct.Discontinued == false)
+        Console.WriteLine("Would you like to discontinue this product?\n\t(y/n).");
+        if (Console.ReadLine().ToLower() == "y")
         {
-          Console.WriteLine("Would you like to discontinue this product?\n\t(y/n).");
-          if (Console.ReadLine().ToLower() == "y")
-          {
-            selectedProduct.Discontinued = true;
-            db.SaveChanges();
-          }
+          selectedProduct.Discontinued = true;
+          db.SaveChanges();
         }
-        else
-        {
-          Console.WriteLine("This product is listed as discontinued.\nPlease press 'Enter' to return to the main menu.");
-          Console.ReadLine();
-        }
-        
       }
       else
       {
-        //error handling
-        logger.Error("User entered an ID out of range");
-        Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+        Console.WriteLine("This product is listed as discontinued.\nPlease press 'Enter' to return to the main menu.");
         Console.ReadLine();
       }
-    }
-    else
-    {
-      //error handling
-      logger.Error("User entered invalid selection.");
-      Console.WriteLine("Invalid Selection.\nPress Enter to return to the main menu.");
-      Console.ReadLine();
+
     }
   }
   else
@@ -1105,3 +1017,28 @@ do
 } while (true);
 
 logger.Info("Program ended");
+
+static int UserChoiceWithinList(string userTestSelection, List<int> availableIds)
+{
+  //checks to see if the user input was an int, then stores the int for later use
+  if (int.TryParse(userTestSelection, out int userSelection))
+  {
+    //checks to see if the user input is in the list of available IDs
+    if (availableIds.Contains(userSelection))
+    {
+      return userSelection;
+    }
+    else
+    {
+      Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+      Console.ReadLine();
+      return 0;
+    }
+  }
+  else
+  {
+    Console.WriteLine("That is not an ID. Please enter an ID.\nPress Enter to return to the main menu.");
+    Console.ReadLine();
+    return 0;
+  }
+}
