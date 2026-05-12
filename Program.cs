@@ -91,7 +91,7 @@ do
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine("Which would you like more information on?");
     Console.Write("?: ");
-    string? userTestSelection = Console.ReadLine();
+    string? userTestSelection = GetLegitUserInput();
 
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
@@ -218,7 +218,7 @@ do
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Which would you like to see all data for?");
         Console.Write("?: ");
-        string? userTestSelection = Console.ReadLine();
+        string? userTestSelection = GetLegitUserInput();
 
         int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
@@ -252,7 +252,7 @@ do
         Console.Clear();
         Console.WriteLine("You selected an option that was not on the menu.\nWould you like to return to menu?\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           logger.Info("Exited Product Info");
           break;
@@ -284,7 +284,7 @@ do
       while (true)
       {
         Console.Write(": ");
-        name = Console.ReadLine();
+        name = GetLegitUserInput();
 
         if (name.Length > 15)
         {
@@ -328,7 +328,7 @@ do
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine("Which would you like to edit?");
       Console.Write("?: ");
-      var userTestSelection = Console.ReadLine();
+      var userTestSelection = GetLegitUserInput();
 
       int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
       if (userSelection != 0)
@@ -341,13 +341,13 @@ do
         var selectedCategory = db.Categories.FirstOrDefault(c => c.CategoryId == userSelection);
         Console.WriteLine($"{selectedCategory.CategoryName} - This is the current name, would you like to change it?\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine("Enter your new name for the Category.\nYour name cannot be longer than 15 letters!");
           while (true)
           {
             Console.Write(": ");
-            name = Console.ReadLine();
+            name = GetLegitUserInput();
 
             if (name.Length > 15)
             {
@@ -362,7 +362,7 @@ do
 
         Console.WriteLine($"{selectedCategory.Description}\nThis is the current description, would you like to change it?\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine("Enter a new description for your Category");
           Console.Write(": ");
@@ -422,7 +422,7 @@ do
       //set name
       Console.WriteLine("What would you like your new product's name to be?");
       Console.Write("?: ");
-      productName = Console.ReadLine();
+      productName = GetLegitUserInput();
 
       //set supplier. This is a special situation so we don't use UserChoiceWithinList()
       {
@@ -442,7 +442,7 @@ do
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Who is the supplier?\nIf they are not listed, please type NL.");
         Console.Write("?: ");
-        var userTestSelection = Console.ReadLine();
+        var userTestSelection = GetLegitUserInput();
 
         //checks to see if the user input was an int, then stores the int for later use
         if (int.TryParse(userTestSelection, out int userSelection))
@@ -493,7 +493,7 @@ do
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("What is the category?\nIf it is not listed, please type NL.");
         Console.Write("?: ");
-        var userTestSelection = Console.ReadLine();
+        var userTestSelection = GetLegitUserInput();
 
         //checks to see if the user input was an int, then stores the int for later use
         if (int.TryParse(userTestSelection, out int userSelection))
@@ -585,7 +585,7 @@ do
       while (true)
       {
         Console.Write("?: ");
-        var holder = Console.ReadLine();
+        var holder = GetLegitUserInput();
         if (holder.ToLower() == "y")
         {
           discontinued = true;
@@ -632,7 +632,7 @@ do
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine("Which would you like to edit?");
       Console.Write("?: ");
-      var userTestSelection = Console.ReadLine();
+      var userTestSelection = GetLegitUserInput();
 
       int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
@@ -647,18 +647,18 @@ do
         //edit name
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s name?\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine("What would you like your new product's name to be?");
           Console.Write("?: ");
-          productEdited.ProductName = Console.ReadLine();
+          productEdited.ProductName = GetLegitUserInput();
         }
 
         //set supplier. Special situation so we don't use UserChoiceWithinList()
         var supplierName = db.Suppliers.Where(s => s.SupplierId == productEdited.SupplierId).Select(s => s.CompanyName).FirstOrDefault();
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s supplier?\n{supplierName}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           {
             var queryS = db.Suppliers.OrderBy(s => s.SupplierId);
@@ -677,7 +677,7 @@ do
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Who is the supplier?\nIf they are not listed, please type NL.");
             Console.Write("?: ");
-            userTestSelection = Console.ReadLine();
+            userTestSelection = GetLegitUserInput();
 
             //checks to see if the user input was an int, then stores the int for later use
             if (int.TryParse(userTestSelection, out userSelection))
@@ -716,7 +716,7 @@ do
         var categoryName = db.Categories.Where(c => c.CategoryId == productEdited.CategoryId).Select(c => c.CategoryName).FirstOrDefault();
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s category?\n{categoryName}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           {
             var queryC = db.Categories.OrderBy(s => s.CategoryId);
@@ -735,7 +735,7 @@ do
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("What is the category?\nIf it is not listed, please type NL.");
             Console.Write("?: ");
-            userTestSelection = Console.ReadLine();
+            userTestSelection = GetLegitUserInput();
 
             //checks to see if the user input was an int, then stores the int for later use
             if (int.TryParse(userTestSelection, out userSelection))
@@ -774,7 +774,7 @@ do
         //edits quantity per unit.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s quantity per unit?\n{productEdited.QuantityPerUnit}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           //sets quantity per unit
           Console.WriteLine($"What is {productEdited.ProductName}'s quantity per unit?");
@@ -785,7 +785,7 @@ do
         //edits unit price.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s unit price?\n{productEdited.UnitPrice}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine($"What is {productEdited.ProductName}'s unit price?");
           Console.Write("?: ");
@@ -802,7 +802,7 @@ do
         //edits units in stock.
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s units in stock?\n{productEdited.UnitsInStock}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine($"How many {productEdited.ProductName}s are in stock?");
           Console.Write("?: ");
@@ -819,7 +819,7 @@ do
         //edits units on order
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s units on order?\n{productEdited.UnitsOnOrder}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine($"How many {productEdited.ProductName}s are on order?");
           Console.Write("?: ");
@@ -836,7 +836,7 @@ do
         //edits reorder level
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s reorder level?\n{productEdited.ReorderLevel}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine($"What is the reorder level of {productEdited.ProductName}?");
           Console.Write("?: ");
@@ -853,13 +853,13 @@ do
         //edits discontinued status
         Console.WriteLine($"Would you like to edit {productEdited.ProductName}'s disconinued status?\n{productEdited.Discontinued}\n\t(y/n)");
         Console.Write("?: ");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           Console.WriteLine($"Is {productEdited.ProductName} discontinued?\n\t(y/n)");
           while (true)
           {
             Console.Write("?: ");
-            var holder = Console.ReadLine();
+            var holder = GetLegitUserInput();
             if (holder.ToLower() == "y")
             {
               productEdited.Discontinued = true;
@@ -909,7 +909,7 @@ do
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine("Which would you like to delete?");
     Console.Write("?: ");
-    string? userTestSelection = Console.ReadLine();
+    string? userTestSelection = GetLegitUserInput();
 
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
@@ -927,7 +927,7 @@ do
 
       Console.ForegroundColor = ConsoleColor.White;
       Console.WriteLine("Would you like to delete this category?\n\t(y/n)");
-      if (Console.ReadLine().ToLower() == "y")
+      if (GetLegitUserInput().ToLower() == "y")
       {
         foreach (var item in queryP)
         {
@@ -971,7 +971,7 @@ do
     Console.ForegroundColor = ConsoleColor.White;
     Console.WriteLine("Which would you like to delete?");
     Console.Write("?: ");
-    string? userTestSelection = Console.ReadLine();
+    string? userTestSelection = GetLegitUserInput();
 
     int userSelection = UserChoiceWithinList(userTestSelection, availableIds);
 
@@ -990,7 +990,7 @@ do
       if (selectedProduct.Discontinued == false)
       {
         Console.WriteLine("Would you like to discontinue this product?\n\t(y/n).");
-        if (Console.ReadLine().ToLower() == "y")
+        if (GetLegitUserInput().ToLower() == "y")
         {
           selectedProduct.Discontinued = true;
           db.SaveChanges();
@@ -1009,7 +1009,7 @@ do
     Console.Clear();
     Console.WriteLine("You selected an option that was not on the menu.\nWould you like to exit the program?\n\t(y/n)");
     Console.Write("?: ");
-    if (Console.ReadLine().ToLower() == "y")
+    if (GetLegitUserInput().ToLower() == "y")
     {
       break;
     }
@@ -1040,5 +1040,23 @@ static int UserChoiceWithinList(string userTestSelection, List<int> availableIds
     Console.WriteLine("That is not an ID. Please enter an ID.\nPress Enter to return to the main menu.");
     Console.ReadLine();
     return 0;
+  }
+}
+
+static String GetLegitUserInput()
+{
+  String? userInput;
+  while (true)
+  {
+    userInput = Console.ReadLine();
+
+    if(userInput != null && userInput != "")
+    {
+      return userInput;
+    }
+    else
+    {
+      Console.WriteLine("Please enter a value.\n?: ");
+    }
   }
 }
