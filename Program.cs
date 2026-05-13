@@ -1155,14 +1155,14 @@ static int UserChoiceWithinList(string userTestSelection, List<int> availableIds
     }
     else
     {
-      Console.WriteLine("That is not an available ID to select.\nPress Enter to return to the main menu.");
+      Console.WriteLine("That is not an available ID to select.\n Press 'Enter' to Continue.");
       Console.ReadLine();
       return -1;
     }
   }
   else
   {
-    Console.WriteLine("That is not an ID. Please enter an ID.\nPress Enter to return to the main menu.");
+    Console.WriteLine("That is not an ID number.\nPress 'Enter' to Continue.");
     Console.ReadLine();
     return -2;
   }
